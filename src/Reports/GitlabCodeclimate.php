@@ -55,7 +55,7 @@ class GitlabCodeclimate implements Report
                 foreach ($colErrors as $error) {
                     $messageObject = new stdClass();
                     $messageObject->description     = $error['message'];
-                    $messageObject->fingerprint     = sha1("${report['filename']}:${line}:${column}:${error['message']}");
+                    $messageObject->fingerprint     = sha1("{$report['filename']}:{$line}:{$column}:{$error['message']}");
                     $messageObject->severity        = self::$severityMap[(int) $error['severity']];
                     $messageObject->location        = new stdClass();
                     $messageObject->location->path  = $report['filename'];
