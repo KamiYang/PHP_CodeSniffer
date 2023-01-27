@@ -10,7 +10,6 @@
 namespace PHP_CodeSniffer\Reports;
 
 use PHP_CodeSniffer\Files\File;
-use stdClass;
 
 class GitlabCodeclimate implements Report
 {
@@ -53,22 +52,28 @@ class GitlabCodeclimate implements Report
         foreach ($report['messages'] as $line => $lineErrors) {
             foreach ($lineErrors as $column => $colErrors) {
                 foreach ($colErrors as $error) {
-                    $messageObject = new stdClass();
-                    $messageObject->description     = $error['message'];
-                    $messageObject->fingerprint     = sha1("{$report['filename']}:{$line}:{$column}:{$error['message']}");
-                    $messageObject->severity        = self::$severityMap[(int) $error['severity']];
-                    $messageObject->location        = new stdClass();
-                    $messageObject->location->path  = $report['filename'];
-                    $messageObject->location->begin = new stdClass();
-                    $messageObject->location->begin->line   = $line;
-                    $messageObject->location->begin->column = $column;
+                    $messageObject = [
+                        'categories'  => ['Bug Risk'],
+                        'check_name'  => $error['source'],
+                        'description' => $error['message'],
+                        'fingerprint' => sha1("{$report['filename']}:{$line}:{$column}:{$error['message']}"),
+                        'location'    => [
+                            'path'  => $report['filename'],
+                            'begin' => [
+                                'line'   => $line,
+                                'column' => $column,
+                            ],
+                        ],
+                        'severity'    => self::$severityMap[(int) $error['severity']],
+                        'type'        => 'issue',
+                    ];
 
                     $messages .= json_encode($messageObject).',';
                 }
-            }
-        }
+            }//end foreach
+        }//end foreach
 
-        echo rtrim($messages, ',');
+        echo $messages;
 
         return true;
 
