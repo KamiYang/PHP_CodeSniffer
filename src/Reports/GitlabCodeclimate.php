@@ -20,11 +20,11 @@ class GitlabCodeclimate implements Report
      * @var string[]
      */
     private static $severityMap = [
-        1 => 'info',
-        2 => 'minor',
+        5 => 'info',
+        4 => 'minor',
         3 => 'major',
-        4 => 'critical',
-        5 => 'blocker',
+        2 => 'critical',
+        1 => 'blocker',
     ];
 
 
