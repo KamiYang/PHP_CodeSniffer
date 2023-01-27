@@ -59,10 +59,7 @@ class GitlabCodeclimate implements Report
                         'fingerprint' => sha1("{$report['filename']}:{$line}:{$column}:{$error['message']}"),
                         'location'    => [
                             'path'  => $report['filename'],
-                            'begin' => [
-                                'line'   => $line,
-                                'column' => $column,
-                            ],
+                            'lines' => ['begin' => $line],
                         ],
                         'severity'    => self::$severityMap[(int) $error['severity']],
                         'type'        => 'issue',
