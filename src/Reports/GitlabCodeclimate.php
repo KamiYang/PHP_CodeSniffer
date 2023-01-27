@@ -15,6 +15,11 @@ use stdClass;
 class GitlabCodeclimate implements Report
 {
 
+    /**
+     * A numeric to string map of severity keywords.
+     *
+     * @var string[]
+     */
     private static $severityMap = [
         1 => 'info',
         2 => 'minor',
@@ -25,12 +30,23 @@ class GitlabCodeclimate implements Report
 
 
     /**
-     * @inheritDoc
+     * Generate a partial report for a single processed file.
+     *
+     * Function should return TRUE if it printed or stored data about the file
+     * and FALSE if it ignored the file. Returning TRUE indicates that the file and
+     * its data should be counted in the grand totals.
+     *
+     * @param array                 $report      Prepared report data.
+     * @param \PHP_CodeSniffer\File $phpcsFile   The file being reported on.
+     * @param bool                  $showSources Show sources?
+     * @param int                   $width       Maximum allowed line width.
+     *
+     * @return bool
      */
     public function generateFileReport($report, File $phpcsFile, $showSources=false, $width=80)
     {
         if ((int) $report['errors'] === 0) {
-            return;
+            return false;
         }
 
         $messages = '';
@@ -39,7 +55,8 @@ class GitlabCodeclimate implements Report
                 foreach ($colErrors as $error) {
                     $messageObject = new stdClass();
                     $messageObject->description     = $error['message'];
-                    $messageObject->severity        = self::$severityMap[$error['severity']];
+                    $messageObject->fingerprint     = sha1("${report['filename']}:${line}:${column}:${error['message']}");
+                    $messageObject->severity        = self::$severityMap[(int) $error['severity']];
                     $messageObject->location        = new stdClass();
                     $messageObject->location->path  = $report['filename'];
                     $messageObject->location->begin = new stdClass();
@@ -53,11 +70,26 @@ class GitlabCodeclimate implements Report
 
         echo rtrim($messages, ',');
 
+        return true;
+
     }//end generateFileReport()
 
 
     /**
-     * @inheritDoc
+     * Generates a GitLab Code Climate report.
+     *
+     * @param string $cachedData    Any partial report data that was returned from
+     *                              generateFileReport during the run.
+     * @param int    $totalFiles    Total number of files processed during the run.
+     * @param int    $totalErrors   Total number of errors found during the run.
+     * @param int    $totalWarnings Total number of warnings found during the run.
+     * @param int    $totalFixable  Total number of problems that can be fixed.
+     * @param bool   $showSources   Show sources?
+     * @param int    $width         Maximum allowed line width.
+     * @param bool   $interactive   Are we running in interactive mode?
+     * @param bool   $toScreen      Is the report being printed to screen?
+     *
+     * @return void
      */
     public function generate(
         $cachedData,
@@ -72,7 +104,7 @@ class GitlabCodeclimate implements Report
     ) {
         echo '[';
         echo rtrim($cachedData, ',');
-        echo ']';
+        echo ']'.PHP_EOL;
 
     }//end generate()
 
