@@ -45,7 +45,7 @@ class GitlabCodeclimate implements Report
      */
     public function generateFileReport($report, File $phpcsFile, $showSources=false, $width=80)
     {
-        if ((int) $report['errors'] === 0) {
+        if ((int) $report['errors'] === 0 && (int) $report['warnings'] === 0) {
             return false;
         }
 
